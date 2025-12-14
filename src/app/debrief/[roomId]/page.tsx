@@ -1,17 +1,19 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 import type { Candidate } from "@/types";
 
 export default function DebriefRoom() {
   const params = useParams();
   const roomId = params.roomId as string;
+  const [candidate, setCandidate] = useState<Candidate | null>(null);
 
-  const candidate = useMemo<Candidate | null>(() => {
-    if (typeof window === "undefined") return null;
+  useEffect(() => {
     const storedCandidate = localStorage.getItem(`room-${roomId}`);
-    return storedCandidate ? JSON.parse(storedCandidate) : null;
+    if (storedCandidate) {
+      setCandidate(JSON.parse(storedCandidate));
+    }
   }, [roomId]);
 
   return (
