@@ -113,10 +113,10 @@ export default function InterviewerRoom() {
 
   const isAssistantActive = isInterviewerInCall && !isCandidatePresent
   const assistantStatusMessage = !isInterviewerInCall
-    ? 'Join the Daily (interview) room to enable the AI assistant.'
+    ? 'Join the interview room to enable the AI assistant.'
     : isCandidatePresent
-    ? 'The assistant has left since the candidate is in the Daily (interview) room.'
-    : 'The assistant is active now and will automatically disconnect once the candidate arrives.'
+    ? 'The assistant has left since the candidate is in the interview room.'
+    : 'The assistant is active now and will automatically disconnect once the candidate joins.'
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black p-8">

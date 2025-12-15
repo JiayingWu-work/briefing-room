@@ -1,20 +1,20 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import type { Candidate } from "@/types";
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import type { Candidate } from '@/types'
 
 export default function Home() {
-  const router = useRouter();
-  const [name, setName] = useState("");
-  const [role, setRole] = useState("");
-  const [notes, setNotes] = useState("");
-  const [candidateLink, setCandidateLink] = useState("");
+  const router = useRouter()
+  const [name, setName] = useState('')
+  const [role, setRole] = useState('')
+  const [notes, setNotes] = useState('')
+  const [candidateLink, setCandidateLink] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    const roomId = crypto.randomUUID();
+    const roomId = crypto.randomUUID()
 
     const candidate: Candidate = {
       id: crypto.randomUUID(),
@@ -22,15 +22,15 @@ export default function Home() {
       role,
       notes: notes || undefined,
       createdAt: new Date().toISOString(),
-    };
+    }
 
-    localStorage.setItem(`room-${roomId}`, JSON.stringify(candidate));
+    localStorage.setItem(`room-${roomId}`, JSON.stringify(candidate))
 
-    const link = `${window.location.origin}/rooms/${roomId}/candidate`;
-    setCandidateLink(link);
+    const link = `${window.location.origin}/rooms/${roomId}/candidate`
+    setCandidateLink(link)
 
-    router.push(`/rooms/${roomId}/interviewer`);
-  };
+    router.push(`/rooms/${roomId}/interviewer`)
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black p-4">
@@ -41,7 +41,10 @@ export default function Home() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1"
+            >
               Candidate Name
             </label>
             <input
@@ -55,7 +58,10 @@ export default function Home() {
           </div>
 
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1"
+            >
               Role
             </label>
             <input
@@ -69,7 +75,10 @@ export default function Home() {
           </div>
 
           <div>
-            <label htmlFor="notes" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
+            <label
+              htmlFor="notes"
+              className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1"
+            >
               Notes (optional)
             </label>
             <textarea
@@ -83,7 +92,7 @@ export default function Home() {
 
           <button
             type="submit"
-            className="w-full bg-black dark:bg-white text-white dark:text-black font-medium py-2 px-4 rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+            className="w-full bg-black dark:bg-white text-white dark:text-black font-medium py-2 px-4 rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer"
           >
             Create Room
           </button>
@@ -101,5 +110,5 @@ export default function Home() {
         )}
       </main>
     </div>
-  );
+  )
 }
