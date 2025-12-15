@@ -9,9 +9,6 @@ interface VapiAgentProps {
   onCallEnd?: () => void
 }
 
-const DEFAULT_GREETING =
-  "Hello! I'm your AI interview assistant. Let me know when you're ready to discuss the candidate."
-
 export default function VapiAgent({
   isActive,
   onCallStart,
@@ -56,7 +53,6 @@ export default function VapiAgent({
       handleCallReady()
       if (!greetingSentRef.current) {
         greetingSentRef.current = true
-        vapi.say(DEFAULT_GREETING)
       }
     }
 

@@ -53,23 +53,25 @@ export default function InterviewerRoom() {
 
   const handleParticipantJoined = useCallback(
     (participant: DailyEventObjectParticipant) => {
-      const userData = (participant as { userData?: { role?: string } }).userData
+      const userData = (participant as { userData?: { role?: string } })
+        .userData
       if (userData?.role === 'candidate') {
         setIsCandidatePresent(true)
       }
     },
-    []
+    [],
   )
 
   const handleParticipantLeft = useCallback(
     (participant: DailyEventObjectParticipantLeft) => {
-      const userData = (participant.participant as { userData?: { role?: string } })
-        .userData
+      const userData = (participant.participant as {
+        userData?: { role?: string }
+      }).userData
       if (userData?.role === 'candidate') {
         setIsCandidatePresent(false)
       }
     },
-    []
+    [],
   )
 
   useEffect(() => {
@@ -77,24 +79,6 @@ export default function InterviewerRoom() {
       setIsAgentCallActive(false)
     }
   }, [isCandidatePresent])
-
-  const assistantStatus = isAgentCallActive
-    ? {
-        text: 'Briefing interviewer',
-        className:
-          'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-      }
-    : !isCandidatePresent
-      ? {
-          text: 'Waiting for candidate',
-          className:
-            'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-        }
-      : {
-          text: 'Off (candidate in room)',
-          className:
-            'bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300',
-        }
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black p-8">
@@ -119,7 +103,9 @@ export default function InterviewerRoom() {
               </h2>
               {isLoadingRoom ? (
                 <div className="flex items-center justify-center h-[500px] bg-zinc-100 dark:bg-zinc-800 rounded-lg">
-                  <p className="text-zinc-600 dark:text-zinc-400">Loading video room...</p>
+                  <p className="text-zinc-600 dark:text-zinc-400">
+                    Loading video room...
+                  </p>
                 </div>
               ) : roomUrl ? (
                 <DailyCall
@@ -131,7 +117,9 @@ export default function InterviewerRoom() {
                 />
               ) : (
                 <div className="flex items-center justify-center h-[500px] bg-zinc-100 dark:bg-zinc-800 rounded-lg">
-                  <p className="text-red-600 dark:text-red-400">Failed to load video room</p>
+                  <p className="text-red-600 dark:text-red-400">
+                    Failed to load video room
+                  </p>
                 </div>
               )}
             </div>
@@ -166,14 +154,10 @@ export default function InterviewerRoom() {
                     AI Interview Assistant
                   </h2>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Briefs you while waiting and leaves once the candidate joins.
+                    Briefs you while waiting and leaves once the candidate
+                    joins.
                   </p>
                 </div>
-                <span
-                  className={`text-xs font-semibold px-2 py-1 rounded-full ${assistantStatus.className}`}
-                >
-                  {assistantStatus.text}
-                </span>
               </div>
               <VapiAgent
                 isActive={!isCandidatePresent}
