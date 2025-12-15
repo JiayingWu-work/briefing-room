@@ -9,7 +9,6 @@ export default function Home() {
   const [name, setName] = useState('')
   const [role, setRole] = useState('')
   const [notes, setNotes] = useState('')
-  const [candidateLink, setCandidateLink] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,9 +24,6 @@ export default function Home() {
     }
 
     localStorage.setItem(`room-${roomId}`, JSON.stringify(candidate))
-
-    const link = `${window.location.origin}/rooms/${roomId}/candidate`
-    setCandidateLink(link)
 
     router.push(`/rooms/${roomId}/interviewer`)
   }
@@ -97,17 +93,6 @@ export default function Home() {
             Create Room
           </button>
         </form>
-
-        {candidateLink && (
-          <div className="mt-6 p-4 bg-zinc-100 dark:bg-zinc-800 rounded-md">
-            <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-              Candidate Link:
-            </p>
-            <code className="block text-xs bg-white dark:bg-zinc-900 p-2 rounded border border-zinc-300 dark:border-zinc-700 break-all text-black dark:text-white">
-              {candidateLink}
-            </code>
-          </div>
-        )}
       </main>
     </div>
   )

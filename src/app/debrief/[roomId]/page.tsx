@@ -1,72 +1,70 @@
-"use client";
+'use client'
 
-import { useParams } from "next/navigation";
-import { useState, useEffect, useCallback, useMemo } from "react";
-import type { Candidate } from "@/types";
+import { useParams } from 'next/navigation'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import type { Candidate } from '@/types'
 
 export default function DebriefRoom() {
-  const params = useParams();
-  const roomId = params.roomId as string;
-  const [candidate, setCandidate] = useState<Candidate | null>(null);
-  const [callId, setCallId] = useState<string | null>(null);
-  const [summary, setSummary] = useState<string | null>(null);
-  const [isSummaryLoading, setIsSummaryLoading] = useState(false);
-  const [summaryError, setSummaryError] = useState<string | null>(null);
+  const params = useParams()
+  const roomId = params.roomId as string
+  const [candidate, setCandidate] = useState<Candidate | null>(null)
+  const [callId, setCallId] = useState<string | null>(null)
+  const [summary, setSummary] = useState<string | null>(null)
+  const [isSummaryLoading, setIsSummaryLoading] = useState(false)
+  const [summaryError, setSummaryError] = useState<string | null>(null)
 
   useEffect(() => {
-    const storedCandidate = localStorage.getItem(`room-${roomId}`);
+    const storedCandidate = localStorage.getItem(`room-${roomId}`)
     if (storedCandidate) {
-      setCandidate(JSON.parse(storedCandidate));
+      setCandidate(JSON.parse(storedCandidate))
     }
-  }, [roomId]);
+  }, [roomId])
 
   const fetchSummary = useCallback(async (id: string) => {
-    setIsSummaryLoading(true);
-    setSummaryError(null);
+    setIsSummaryLoading(true)
+    setSummaryError(null)
     try {
       const response = await fetch(
         `/api/vapi-summary?callId=${encodeURIComponent(id)}`,
-      );
-      const data = await response.json();
+      )
+      const data = await response.json()
       if (!response.ok) {
-        throw new Error(data.error ?? "Failed to fetch summary.");
+        throw new Error(data.error ?? 'Failed to fetch summary.')
       }
-      setSummary(data.summary ?? null);
+      setSummary(data.summary ?? null)
     } catch (error) {
       const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch AI summary.";
-      setSummaryError(message);
+        error instanceof Error ? error.message : 'Failed to fetch AI summary.'
+      setSummaryError(message)
     } finally {
-      setIsSummaryLoading(false);
+      setIsSummaryLoading(false)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    const storedMetadata = localStorage.getItem(`vapi-call-${roomId}`);
-    if (!storedMetadata) return;
+    const storedMetadata = localStorage.getItem(`vapi-call-${roomId}`)
+    if (!storedMetadata) return
 
     try {
       const parsed = JSON.parse(storedMetadata) as {
-        callId?: string;
-      };
+        callId?: string
+      }
       if (parsed?.callId) {
-        setCallId(parsed.callId);
-        fetchSummary(parsed.callId);
+        setCallId(parsed.callId)
+        fetchSummary(parsed.callId)
       }
     } catch (error) {
-      console.error("Failed to parse Vapi metadata:", error);
+      console.error('Failed to parse Vapi metadata:', error)
     }
-  }, [roomId, fetchSummary]);
+  }, [roomId, fetchSummary])
 
   const summaryLines = useMemo(() => {
-    if (!summary) return [];
+    if (!summary) return []
     return summary
       .split(/\n+/)
-      .map((line) => line.replace(/^[\-\u2022]+\s*/, "").trim())
-      .filter((line) => line.length > 0);
-  }, [summary]);
+      .map((line) => line.replace(/^[\-\u2022]+\s*/, '').trim())
+      .filter((line) => line.length > 0)
+  }, [summary])
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black p-8">
@@ -112,9 +110,9 @@ export default function DebriefRoom() {
                 type="button"
                 disabled={!callId || isSummaryLoading}
                 onClick={() => callId && fetchSummary(callId)}
-                className="px-3 py-1.5 rounded-md text-sm font-medium border border-zinc-300 dark:border-zinc-700 text-black dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-1.5 rounded-md text-sm font-medium border border-zinc-300 dark:border-zinc-700 text-black dark:text-zinc-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                {isSummaryLoading ? "Refreshing..." : "Refresh summary"}
+                {isSummaryLoading ? 'Refreshing...' : 'Refresh summary'}
               </button>
             </div>
 
@@ -146,5 +144,5 @@ export default function DebriefRoom() {
         </div>
       </div>
     </div>
-  );
+  )
 }

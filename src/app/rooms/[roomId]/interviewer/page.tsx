@@ -100,6 +100,7 @@ export default function InterviewerRoom() {
   )
 
   const handleInterviewerLeft = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (_event: DailyEventObjectNoPayload) => {
       setIsInterviewerInCall(false)
       setIsCandidatePresent(false)
@@ -187,8 +188,8 @@ export default function InterviewerRoom() {
                     AI Interview Assistant
                   </h2>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Briefs you before the candidate joins, then silently
-                    records the session for the debrief summary.
+                    Briefs you before the candidate joins, then silently records
+                    the session for the debrief summary.
                   </p>
                 </div>
               </div>
