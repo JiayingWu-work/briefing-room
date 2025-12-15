@@ -111,12 +111,13 @@ export default function InterviewerRoom() {
     [roomId, router],
   )
 
-  const isAssistantActive = isInterviewerInCall && !isCandidatePresent
+  const isAssistantActive = isInterviewerInCall
+  const isAssistantMuted = isInterviewerInCall && isCandidatePresent
   const assistantStatusMessage = !isInterviewerInCall
     ? 'Join the interview room to enable the AI assistant.'
     : isCandidatePresent
-    ? 'The assistant has left since the candidate is in the interview room.'
-    : 'The assistant is active now and will automatically disconnect once the candidate joins.'
+    ? 'The assistant is muted while the candidate is interviewing but is still recording for the summary.'
+    : 'The assistant is currently briefing you until the candidate joins.'
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black p-8">
@@ -186,12 +187,16 @@ export default function InterviewerRoom() {
                     AI Interview Assistant
                   </h2>
                   <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    Briefs you while waiting and leaves once the candidate
-                    joins.
+                    Briefs you before the candidate joins, then silently
+                    records the session for the debrief summary.
                   </p>
                 </div>
               </div>
-              <VapiAgent isActive={isAssistantActive} />
+              <VapiAgent
+                isActive={isAssistantActive}
+                isMuted={isAssistantMuted}
+                roomId={roomId}
+              />
               <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
                 {assistantStatusMessage}
               </p>
