@@ -7,6 +7,27 @@ import DailyIframe, {
   DailyEventObjectParticipantLeft,
 } from '@daily-co/daily-js'
 
+// Allow multiple Daily call instances (for Vapi + host call) once on the client.
+if (typeof window !== 'undefined') {
+  const dailyWithFlag = DailyIframe as typeof DailyIframe & {
+    __allowMultiplePatched?: boolean
+  }
+
+  if (!dailyWithFlag.__allowMultiplePatched) {
+    const originalCreateCallObject = dailyWithFlag.createCallObject.bind(
+      DailyIframe
+    )
+
+    dailyWithFlag.createCallObject = (properties = {}) =>
+      originalCreateCallObject({
+        allowMultipleCallInstances: true,
+        ...properties,
+      })
+
+    dailyWithFlag.__allowMultiplePatched = true
+  }
+}
+
 interface DailyCallProps {
   roomUrl: string
   userName: string
@@ -34,6 +55,8 @@ export default function DailyCall({
 
     const callFrame = DailyIframe.createFrame(containerRef.current, {
       showLeaveButton: true,
+      allowMultipleCallInstances: true,
+      url: roomUrl,
       iframeStyle: {
         position: 'absolute',
         top: '0',

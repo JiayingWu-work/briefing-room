@@ -1,9 +1,10 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { useMemo, useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { Candidate } from '@/types'
 import DailyCall from '@/components/DailyCall'
+import VapiAgent from '@/components/VapiAgent'
 import type {
   DailyEventObjectParticipant,
   DailyEventObjectParticipantLeft,
@@ -15,8 +16,10 @@ export default function InterviewerRoom() {
   const [roomUrl, setRoomUrl] = useState<string | null>(null)
   const [isCandidatePresent, setIsCandidatePresent] = useState(false)
   const [isLoadingRoom, setIsLoadingRoom] = useState(true)
+  const [isAgentCallActive, setIsAgentCallActive] = useState(false)
 
   const [candidate, setCandidate] = useState<Candidate | null>(null)
+  const [candidateLink, setCandidateLink] = useState('')
 
   useEffect(() => {
     const storedCandidate = localStorage.getItem(`room-${roomId}`)
@@ -25,9 +28,8 @@ export default function InterviewerRoom() {
     }
   }, [roomId])
 
-  const candidateLink = useMemo(() => {
-    if (typeof window === 'undefined') return ''
-    return `${window.location.origin}/rooms/${roomId}/candidate`
+  useEffect(() => {
+    setCandidateLink(`${window.location.origin}/rooms/${roomId}/candidate`)
   }, [roomId])
 
   useEffect(() => {
@@ -69,6 +71,30 @@ export default function InterviewerRoom() {
     },
     []
   )
+
+  useEffect(() => {
+    if (isCandidatePresent) {
+      setIsAgentCallActive(false)
+    }
+  }, [isCandidatePresent])
+
+  const assistantStatus = isAgentCallActive
+    ? {
+        text: 'Briefing interviewer',
+        className:
+          'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+      }
+    : !isCandidatePresent
+      ? {
+          text: 'Waiting for candidate',
+          className:
+            'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+        }
+      : {
+          text: 'Off (candidate in room)',
+          className:
+            'bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300',
+        }
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black p-8">
@@ -132,6 +158,34 @@ export default function InterviewerRoom() {
                 </div>
               </div>
             )}
+
+            <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-lg p-6">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h2 className="text-xl font-semibold text-black dark:text-zinc-50">
+                    AI Interview Assistant
+                  </h2>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                    Briefs you while waiting and leaves once the candidate joins.
+                  </p>
+                </div>
+                <span
+                  className={`text-xs font-semibold px-2 py-1 rounded-full ${assistantStatus.className}`}
+                >
+                  {assistantStatus.text}
+                </span>
+              </div>
+              <VapiAgent
+                isActive={!isCandidatePresent}
+                onCallStart={() => setIsAgentCallActive(true)}
+                onCallEnd={() => setIsAgentCallActive(false)}
+              />
+              <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+                {isCandidatePresent
+                  ? 'The assistant has left since the candidate is in the Daily room.'
+                  : 'The assistant is active now and will automatically disconnect once the candidate arrives.'}
+              </p>
+            </div>
 
             <div className="bg-zinc-100 dark:bg-zinc-800 rounded-lg p-6">
               <h2 className="text-lg font-semibold mb-2 text-black dark:text-zinc-50">
