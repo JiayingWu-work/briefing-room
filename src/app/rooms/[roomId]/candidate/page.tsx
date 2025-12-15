@@ -1,43 +1,52 @@
-"use client";
+'use client'
 
-import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import type { Candidate } from "@/types";
-import DailyCall from "@/components/DailyCall";
+import { useParams } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react'
+import type { Candidate } from '@/types'
+import DailyCall from '@/components/DailyCall'
 
 export default function CandidateRoom() {
-  const params = useParams();
-  const roomId = params.roomId as string;
-  const [roomUrl, setRoomUrl] = useState<string | null>(null);
-  const [isLoadingRoom, setIsLoadingRoom] = useState(true);
+  const params = useParams()
+  const roomId = params.roomId as string
+  const [roomUrl, setRoomUrl] = useState<string | null>(null)
+  const [isLoadingRoom, setIsLoadingRoom] = useState(true)
+  const [hasCandidateLeft, setHasCandidateLeft] = useState(false)
 
-  const [candidate, setCandidate] = useState<Candidate | null>(null);
+  const [candidate, setCandidate] = useState<Candidate | null>(null)
+
+  const handleCallJoined = useCallback(() => {
+    setHasCandidateLeft(false)
+  }, [])
+
+  const handleCallLeft = useCallback(() => {
+    setHasCandidateLeft(true)
+  }, [])
 
   useEffect(() => {
-    const storedCandidate = localStorage.getItem(`room-${roomId}`);
+    const storedCandidate = localStorage.getItem(`room-${roomId}`)
     if (storedCandidate) {
-      setCandidate(JSON.parse(storedCandidate));
+      setCandidate(JSON.parse(storedCandidate))
     }
-  }, [roomId]);
+  }, [roomId])
 
   useEffect(() => {
     async function fetchDailyRoom() {
       try {
-        const response = await fetch(`/api/daily-room?roomId=${roomId}`);
+        const response = await fetch(`/api/daily-room?roomId=${roomId}`)
         if (!response.ok) {
-          throw new Error("Failed to create Daily room");
+          throw new Error('Failed to create Daily room')
         }
-        const data = await response.json();
-        setRoomUrl(data.roomUrl);
+        const data = await response.json()
+        setRoomUrl(data.roomUrl)
       } catch (error) {
-        console.error("Error fetching Daily room:", error);
+        console.error('Error fetching Daily room:', error)
       } finally {
-        setIsLoadingRoom(false);
+        setIsLoadingRoom(false)
       }
     }
 
-    fetchDailyRoom();
-  }, [roomId]);
+    fetchDailyRoom()
+  }, [roomId])
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black p-8">
@@ -52,7 +61,8 @@ export default function CandidateRoom() {
               Welcome, {candidate.name}!
             </h2>
             <p className="text-zinc-700 dark:text-zinc-300">
-              You are interviewing for the position of <strong>{candidate.role}</strong>.
+              You are interviewing for the position of{' '}
+              <strong>{candidate.role}</strong>.
             </p>
           </div>
         )}
@@ -63,21 +73,33 @@ export default function CandidateRoom() {
           </h2>
           {isLoadingRoom ? (
             <div className="flex items-center justify-center h-[500px] bg-zinc-100 dark:bg-zinc-800 rounded-lg">
-              <p className="text-zinc-600 dark:text-zinc-400">Loading video room...</p>
+              <p className="text-zinc-600 dark:text-zinc-400">
+                Loading video room...
+              </p>
             </div>
-          ) : roomUrl ? (
+          ) : roomUrl && !hasCandidateLeft ? (
             <DailyCall
               roomUrl={roomUrl}
-              userName={candidate?.name || "Candidate"}
+              userName={candidate?.name || 'Candidate'}
               userRole="candidate"
+              onMeetingJoined={handleCallJoined}
+              onMeetingLeft={handleCallLeft}
             />
+          ) : roomUrl && hasCandidateLeft ? (
+            <div className="flex flex-col items-center justify-center h-[500px] bg-zinc-100 dark:bg-zinc-800 rounded-lg text-center px-6">
+              <p className="text-xl font-semibold text-black dark:text-white mb-2">
+                You just completed your interview! Great job!
+              </p>
+            </div>
           ) : (
             <div className="flex items-center justify-center h-[500px] bg-zinc-100 dark:bg-zinc-800 rounded-lg">
-              <p className="text-red-600 dark:text-red-400">Failed to load video room</p>
+              <p className="text-red-600 dark:text-red-400">
+                Failed to load video room
+              </p>
             </div>
           )}
         </div>
       </div>
     </div>
-  );
+  )
 }

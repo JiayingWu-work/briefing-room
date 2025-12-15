@@ -1,7 +1,7 @@
 'use client'
 
-import { useParams } from 'next/navigation'
-import { useState, useEffect, useCallback } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import type { Candidate } from '@/types'
 import DailyCall from '@/components/DailyCall'
 import VapiAgent from '@/components/VapiAgent'
@@ -16,11 +16,13 @@ import type {
 
 export default function InterviewerRoom() {
   const params = useParams()
+  const router = useRouter()
   const roomId = params.roomId as string
   const [roomUrl, setRoomUrl] = useState<string | null>(null)
   const [isCandidatePresent, setIsCandidatePresent] = useState(false)
   const [isLoadingRoom, setIsLoadingRoom] = useState(true)
   const [isInterviewerInCall, setIsInterviewerInCall] = useState(false)
+  const hasRedirectedRef = useRef(false)
 
   const [candidate, setCandidate] = useState<Candidate | null>(null)
   const [candidateLink, setCandidateLink] = useState('')
@@ -101,8 +103,12 @@ export default function InterviewerRoom() {
     (_event: DailyEventObjectNoPayload) => {
       setIsInterviewerInCall(false)
       setIsCandidatePresent(false)
+      if (!hasRedirectedRef.current) {
+        hasRedirectedRef.current = true
+        router.push(`/debrief/${roomId}`)
+      }
     },
-    [],
+    [roomId, router],
   )
 
   const isAssistantActive = isInterviewerInCall && !isCandidatePresent
