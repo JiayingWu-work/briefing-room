@@ -3,8 +3,10 @@
 import { useEffect, useRef } from 'react'
 import DailyIframe, {
   DailyCall as DailyCallType,
+  DailyEventObjectNoPayload,
   DailyEventObjectParticipant,
   DailyEventObjectParticipantLeft,
+  DailyEventObjectParticipants,
 } from '@daily-co/daily-js'
 
 // Allow multiple Daily call instances (for Vapi + host call) once on the client.
@@ -34,6 +36,8 @@ interface DailyCallProps {
   userRole: 'interviewer' | 'candidate'
   onParticipantJoined?: (participant: DailyEventObjectParticipant) => void
   onParticipantLeft?: (participant: DailyEventObjectParticipantLeft) => void
+  onMeetingJoined?: (event: DailyEventObjectParticipants) => void
+  onMeetingLeft?: (event: DailyEventObjectNoPayload) => void
 }
 
 export default function DailyCall({
@@ -42,6 +46,8 @@ export default function DailyCall({
   userRole,
   onParticipantJoined,
   onParticipantLeft,
+  onMeetingJoined,
+  onMeetingLeft,
 }: DailyCallProps) {
   const callFrameRef = useRef<DailyCallType | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -84,6 +90,14 @@ export default function DailyCall({
       callFrame.on('participant-left', onParticipantLeft)
     }
 
+    if (onMeetingJoined) {
+      callFrame.on('joined-meeting', onMeetingJoined)
+    }
+
+    if (onMeetingLeft) {
+      callFrame.on('left-meeting', onMeetingLeft)
+    }
+
     return () => {
       if (callFrameRef.current) {
         callFrameRef.current.destroy()
@@ -91,7 +105,15 @@ export default function DailyCall({
       }
       isInitializedRef.current = false
     }
-  }, [roomUrl, userName, userRole, onParticipantJoined, onParticipantLeft])
+  }, [
+    roomUrl,
+    userName,
+    userRole,
+    onParticipantJoined,
+    onParticipantLeft,
+    onMeetingJoined,
+    onMeetingLeft,
+  ])
 
   return (
     <div

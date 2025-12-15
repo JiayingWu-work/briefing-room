@@ -6,8 +6,12 @@ import type { Candidate } from '@/types'
 import DailyCall from '@/components/DailyCall'
 import VapiAgent from '@/components/VapiAgent'
 import type {
+  DailyEventObjectNoPayload,
   DailyEventObjectParticipant,
   DailyEventObjectParticipantLeft,
+  DailyEventObjectParticipants,
+  DailyParticipant,
+  DailyParticipantsObject,
 } from '@daily-co/daily-js'
 
 export default function InterviewerRoom() {
@@ -16,7 +20,7 @@ export default function InterviewerRoom() {
   const [roomUrl, setRoomUrl] = useState<string | null>(null)
   const [isCandidatePresent, setIsCandidatePresent] = useState(false)
   const [isLoadingRoom, setIsLoadingRoom] = useState(true)
-  const [isAgentCallActive, setIsAgentCallActive] = useState(false)
+  const [isInterviewerInCall, setIsInterviewerInCall] = useState(false)
 
   const [candidate, setCandidate] = useState<Candidate | null>(null)
   const [candidateLink, setCandidateLink] = useState('')
@@ -51,11 +55,25 @@ export default function InterviewerRoom() {
     fetchDailyRoom()
   }, [roomId])
 
+  const isCandidateParticipant = (participant?: DailyParticipant) => {
+    const userData = participant?.userData as { role?: string } | undefined
+    return userData?.role === 'candidate'
+  }
+
+  const updateCandidatePresenceFromParticipants = useCallback(
+    (participants?: DailyParticipantsObject) => {
+      if (!participants) return
+      const hasCandidate = Object.values(participants).some((participant) =>
+        isCandidateParticipant(participant),
+      )
+      setIsCandidatePresent(hasCandidate)
+    },
+    [],
+  )
+
   const handleParticipantJoined = useCallback(
-    (participant: DailyEventObjectParticipant) => {
-      const userData = (participant as { userData?: { role?: string } })
-        .userData
-      if (userData?.role === 'candidate') {
+    (event: DailyEventObjectParticipant) => {
+      if (isCandidateParticipant(event.participant)) {
         setIsCandidatePresent(true)
       }
     },
@@ -63,22 +81,36 @@ export default function InterviewerRoom() {
   )
 
   const handleParticipantLeft = useCallback(
-    (participant: DailyEventObjectParticipantLeft) => {
-      const userData = (participant.participant as {
-        userData?: { role?: string }
-      }).userData
-      if (userData?.role === 'candidate') {
+    (event: DailyEventObjectParticipantLeft) => {
+      if (isCandidateParticipant(event.participant)) {
         setIsCandidatePresent(false)
       }
     },
     [],
   )
 
-  useEffect(() => {
-    if (isCandidatePresent) {
-      setIsAgentCallActive(false)
-    }
-  }, [isCandidatePresent])
+  const handleInterviewerJoined = useCallback(
+    (event: DailyEventObjectParticipants) => {
+      setIsInterviewerInCall(true)
+      updateCandidatePresenceFromParticipants(event.participants)
+    },
+    [updateCandidatePresenceFromParticipants],
+  )
+
+  const handleInterviewerLeft = useCallback(
+    (_event: DailyEventObjectNoPayload) => {
+      setIsInterviewerInCall(false)
+      setIsCandidatePresent(false)
+    },
+    [],
+  )
+
+  const isAssistantActive = isInterviewerInCall && !isCandidatePresent
+  const assistantStatusMessage = !isInterviewerInCall
+    ? 'Join the Daily (interview) room to enable the AI assistant.'
+    : isCandidatePresent
+    ? 'The assistant has left since the candidate is in the Daily (interview) room.'
+    : 'The assistant is active now and will automatically disconnect once the candidate arrives.'
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black p-8">
@@ -86,14 +118,6 @@ export default function InterviewerRoom() {
         <h1 className="text-3xl font-semibold mb-4 text-black dark:text-zinc-50">
           Interviewer Room
         </h1>
-
-        {isCandidatePresent && (
-          <div className="mb-4 p-3 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 rounded-lg">
-            <p className="text-green-800 dark:text-green-200 font-medium">
-              Candidate is present
-            </p>
-          </div>
-        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <div className="lg:col-span-2">
@@ -114,6 +138,8 @@ export default function InterviewerRoom() {
                   userRole="interviewer"
                   onParticipantJoined={handleParticipantJoined}
                   onParticipantLeft={handleParticipantLeft}
+                  onMeetingJoined={handleInterviewerJoined}
+                  onMeetingLeft={handleInterviewerLeft}
                 />
               ) : (
                 <div className="flex items-center justify-center h-[500px] bg-zinc-100 dark:bg-zinc-800 rounded-lg">
@@ -159,15 +185,9 @@ export default function InterviewerRoom() {
                   </p>
                 </div>
               </div>
-              <VapiAgent
-                isActive={!isCandidatePresent}
-                onCallStart={() => setIsAgentCallActive(true)}
-                onCallEnd={() => setIsAgentCallActive(false)}
-              />
+              <VapiAgent isActive={isAssistantActive} />
               <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-                {isCandidatePresent
-                  ? 'The assistant has left since the candidate is in the Daily room.'
-                  : 'The assistant is active now and will automatically disconnect once the candidate arrives.'}
+                {assistantStatusMessage}
               </p>
             </div>
 
