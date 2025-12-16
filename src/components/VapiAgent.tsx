@@ -128,8 +128,14 @@ export default function VapiAgent({
         setIsCallActive(true)
         onCallStartRef.current?.()
       }
+
       appliedMuteRef.current = null
-      applyMuteState(isMutedRef.current, { forceGreeting: true })
+
+      if (isMutedRef.current) {
+        applyMuteState(true)
+      } else {
+        applyMuteState(false, { forceGreeting: true })
+      }
     }
 
     const handleCallStart = () => {
