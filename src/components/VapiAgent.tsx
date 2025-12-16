@@ -48,6 +48,7 @@ export default function VapiAgent({
     isMutedRef.current = isMuted
   }, [isMuted])
 
+  // Cache call IDs so the debrief API can retrieve the summary later.
   const persistCallMetadata = useCallback(
     (status: 'active' | 'ended', callId?: string | null) => {
       const idToStore = callId ?? currentCallIdRef.current
@@ -69,6 +70,7 @@ export default function VapiAgent({
     [callStorageKey],
   )
 
+  // Force-stop any in-progress speech when the candidate arrives.
   const interruptAssistant = useCallback(() => {
     try {
       vapiRef.current?.say?.(' ', false, false, true)
@@ -77,6 +79,7 @@ export default function VapiAgent({
     }
   }, [])
 
+  // Small helper around Vapi's Live Call Control channel.
   const sendControlMessage = useCallback((command: ControlCommand) => {
     const client = vapiRef.current as Vapi & {
       send?: (message: { type: 'control'; control: ControlCommand }) => void
@@ -88,6 +91,7 @@ export default function VapiAgent({
     }
   }, [])
 
+  // Keeps the assistant's speaking state synchronized with Daily presence.
   const applyMuteState = useCallback(
     (shouldMute: boolean, { forceGreeting = false } = {}) => {
       if (!vapiRef.current) return
@@ -109,6 +113,7 @@ export default function VapiAgent({
     [interruptAssistant, sendControlMessage],
   )
 
+  // Initialize the Vapi client once when the component mounts.
   useEffect(() => {
     const publicKey = process.env.NEXT_PUBLIC_VAPI_PUBLIC_KEY
     if (!publicKey) {
@@ -181,6 +186,7 @@ export default function VapiAgent({
     }
   }, [applyMuteState, persistCallMetadata])
 
+  // Start/stop the underlying Vapi call when the interviewer joins/leaves.
   useEffect(() => {
     if (!vapiRef.current) return
 
@@ -214,6 +220,7 @@ export default function VapiAgent({
     }
   }, [isActive, isCallActive])
 
+  // React to candidate presence and apply the correct mute state.
   useEffect(() => {
     if (isCallActive) {
       applyMuteState(isMuted)

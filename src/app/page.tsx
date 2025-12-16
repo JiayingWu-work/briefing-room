@@ -10,6 +10,7 @@ export default function Home() {
   const [role, setRole] = useState('')
   const [notes, setNotes] = useState('')
 
+  // Creates a new room, persists the candidate locally, and routes the interviewer in.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 

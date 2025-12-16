@@ -22,6 +22,7 @@ export default function CandidateRoom() {
     setHasCandidateLeft(true)
   }, [])
 
+  // Restore the candidate info that was cached on the home page.
   useEffect(() => {
     const storedCandidate = localStorage.getItem(`room-${roomId}`)
     if (storedCandidate) {
@@ -29,6 +30,7 @@ export default function CandidateRoom() {
     }
   }, [roomId])
 
+  // Create or fetch the Daily room URL so the candidate can join.
   useEffect(() => {
     async function fetchDailyRoom() {
       try {

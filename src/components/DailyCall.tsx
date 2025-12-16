@@ -53,6 +53,7 @@ export default function DailyCall({
   const containerRef = useRef<HTMLDivElement>(null)
   const isInitializedRef = useRef(false)
 
+  // Bootstraps the Daily iframe once and cleans it up when the component unmounts.
   useEffect(() => {
     if (!roomUrl || !containerRef.current || isInitializedRef.current) return
     if (containerRef.current.querySelector('iframe')) return

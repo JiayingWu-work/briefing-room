@@ -27,6 +27,7 @@ export default function InterviewerRoom() {
   const [candidate, setCandidate] = useState<Candidate | null>(null)
   const [candidateLink, setCandidateLink] = useState('')
 
+  // Restore any cached candidate data created on the landing page.
   useEffect(() => {
     const storedCandidate = localStorage.getItem(`room-${roomId}`)
     if (storedCandidate) {
@@ -38,6 +39,7 @@ export default function InterviewerRoom() {
     setCandidateLink(`${window.location.origin}/rooms/${roomId}/candidate`)
   }, [roomId])
 
+  // Create or fetch the Daily room so the interviewer can join.
   useEffect(() => {
     async function fetchDailyRoom() {
       try {
